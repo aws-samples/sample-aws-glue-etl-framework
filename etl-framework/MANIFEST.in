@@ -1,0 +1,4 @@
+include VERSION
+include README.md
+include requirements.txt
+recursive-include src/etl_framework *.json *.sql

@@ -1,0 +1,28 @@
+{
+  "config_key": "EXAMPLE_S3_TO_ICEBERG",
+  "source_list": [
+    {
+      "source_key": "user_events",
+      "source_type": "S3",
+      "source_s3_bucket": "<YOUR-EVENT-STREAM-BUCKET>",
+      "source_s3_path": "events/",
+      "source_format": "json",
+      "source_format_options": {
+        "multiLine": "false"
+      },
+      "create_temp_view": true,
+      "source_select_columns": ["user_id", "event_name", "timestamp", "properties"]
+    }
+  ],
+  "target_list": [
+    {
+      "target_type": "ICEBERG",
+      "source_config_key": "user_events",
+      "database_name": "lakehouse",
+      "table_name": "user_events",
+      "catalog_name": "iceberg",
+      "write_mode": "append",
+      "partition_by": ["event_name"]
+    }
+  ]
+}

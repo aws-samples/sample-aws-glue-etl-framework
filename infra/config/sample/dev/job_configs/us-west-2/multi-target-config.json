@@ -1,0 +1,60 @@
+{
+  "config_key": "MULTI_TARGET_JOB",
+  "source_list": [
+    {
+      "source_key": "orders_data",
+      "source_type": "S3",
+      "source_s3_path": "raw/orders/",
+      "source_format": "csv",
+      "source_format_options": {
+        "header": "true",
+        "inferSchema": "true"
+      },
+      "create_temp_view": true,
+      "watermark_strategy": "timestamp",
+      "watermark_column": "order_date",
+      "table_name_watermark": "orders_watermark"
+    }
+  ],
+  "target_list": [
+    {
+      "target_type": "S3",
+      "source_config_key": "orders_data",
+      "database_name": "analytics",
+      "table_name": "orders_archive",
+      "target_s3_path": "s3://mycompany-dev-123456789012-us-west-2-ingestion/processed/orders/",
+      "target_format": "parquet",
+      "write_mode": "append",
+      "partition_by": ["order_date"],
+      "compression": "snappy"
+    },
+    {
+      "target_type": "REDSHIFT",
+      "source_config_key": "orders_data",
+      "database_name": "analytics",
+      "schema_name": "raw",
+      "table_name": "orders",
+      "write_mode": "append",
+      "target_redshift_secrets_arn": "arn:aws:secretsmanager:us-west-2:123456789012:secret:redshift-credentials",
+      "target_redshift_arn": "arn:aws:iam::123456789012:role/redshift-s3-access",
+      "tempdir": "s3://mycompany-dev-123456789012-us-west-2-glue/temp/redshift/"
+    }
+  ],
+  "enrichment_config": {
+    "enabled": true,
+    "enrichments": [
+      {
+        "source_key": "orders_data",
+        "lookups": [
+          {
+            "lookup_key": "product_catalog",
+            "lookup_s3_path": "s3://mycompany-dev-123456789012-us-west-2-ingestion/lookups/products.csv",
+            "lookup_format": "csv",
+            "join_column": "product_id",
+            "select_columns": ["product_name", "category", "brand"]
+          }
+        ]
+      }
+    ]
+  }
+}

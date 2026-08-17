@@ -1,0 +1,27 @@
+{
+  "config_key": "EXAMPLE_S3_TO_REDSHIFT",
+  "source_list": [
+    {
+      "source_key": "sales_data",
+      "source_type": "S3",
+      "source_s3_bucket": "<YOUR-DATA-LAKE-BUCKET>",
+      "source_s3_path": "raw/sales/2024/",
+      "source_format": "parquet",
+      "create_temp_view": true,
+      "source_filter": "amount > 0"
+    }
+  ],
+  "target_list": [
+    {
+      "target_type": "REDSHIFT",
+      "source_config_key": "sales_data",
+      "database_name": "warehouse",
+      "schema_name": "raw",
+      "table_name": "sales",
+      "write_mode": "append",
+      "target_redshift_secrets_arn": "arn:aws:secretsmanager:us-west-2:123456789012:secret:my-redshift-creds",
+      "pre_actions": "DELETE FROM raw.sales WHERE sale_date >= CURRENT_DATE - 7;",
+      "tempdir": "s3://<YOUR-GLUE-BUCKET>/temp/redshift/"
+    }
+  ]
+}

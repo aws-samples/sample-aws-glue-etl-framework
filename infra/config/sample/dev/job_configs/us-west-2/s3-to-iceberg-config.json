@@ -1,0 +1,27 @@
+{
+  "config_key": "S3_TO_ICEBERG_JOB",
+  "source_list": [
+    {
+      "source_key": "clickstream_data",
+      "source_type": "S3",
+      "source_s3_path": "raw/clickstream/",
+      "source_format": "json",
+      "source_format_options": {
+        "multiLine": "true"
+      },
+      "create_temp_view": true,
+      "source_select_columns": ["user_id", "event_type", "timestamp", "page_url", "session_id"]
+    }
+  ],
+  "target_list": [
+    {
+      "target_type": "ICEBERG",
+      "source_config_key": "clickstream_data",
+      "database_name": "analytics_lake",
+      "table_name": "clickstream_events",
+      "catalog_name": "iceberg",
+      "write_mode": "append",
+      "partition_by": ["event_type"]
+    }
+  ]
+}

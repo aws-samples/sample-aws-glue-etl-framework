@@ -1,0 +1,25 @@
+{
+  "config_key": "S3_TO_REDSHIFT_JOB",
+  "source_list": [
+    {
+      "source_key": "raw_events",
+      "source_type": "S3",
+      "source_s3_path": "raw/events/",
+      "source_format": "parquet",
+      "create_temp_view": true
+    }
+  ],
+  "target_list": [
+    {
+      "target_type": "REDSHIFT",
+      "source_config_key": "raw_events",
+      "database_name": "analytics",
+      "schema_name": "raw",
+      "table_name": "events",
+      "write_mode": "append",
+      "target_redshift_secrets_arn": "arn:aws:secretsmanager:us-west-2:123456789012:secret:redshift-credentials",
+      "target_redshift_arn": "arn:aws:iam::123456789012:role/redshift-s3-access",
+      "tempdir": "s3://mycompany-dev-123456789012-us-west-2-glue/temp/redshift/"
+    }
+  ]
+}

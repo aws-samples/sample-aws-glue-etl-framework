@@ -1,0 +1,71 @@
+{
+  "config_key": "ENRICHED_ORDERS_JOB",
+  "source_list": [
+    {
+      "source_key": "raw_orders",
+      "source_type": "S3",
+      "source_s3_path": "raw/orders/",
+      "source_format": "parquet",
+      "create_temp_view": true,
+      "watermark_strategy": "timestamp",
+      "watermark_column": "updated_at",
+      "table_name_watermark": "orders_incremental"
+    },
+    {
+      "source_key": "customer_data",
+      "source_type": "GLUE",
+      "database_name": "customer_db",
+      "table_name": "customers",
+      "create_temp_view": true
+    }
+  ],
+  "target_list": [
+    {
+      "target_type": "ICEBERG",
+      "source_config_key": "raw_orders",
+      "database_name": "analytics_lake",
+      "table_name": "enriched_orders",
+      "catalog_name": "iceberg",
+      "write_mode": "append",
+      "partition_by": ["order_date"],
+      "internal_record_id": true
+    },
+    {
+      "target_type": "S3",
+      "source_config_key": "raw_orders",
+      "database_name": "archive",
+      "table_name": "orders_backup",
+      "target_s3_path": "s3://<YOUR-ARCHIVE-BUCKET>/orders/",
+      "target_format": "parquet",
+      "write_mode": "append",
+      "compression": "zstd",
+      "partition_by": ["order_date"]
+    }
+  ],
+  "enrichment_config": {
+    "enabled": true,
+    "enrichments": [
+      {
+        "source_key": "raw_orders",
+        "lookups": [
+          {
+            "lookup_key": "product_info",
+            "lookup_s3_path": "s3://<YOUR-DATA-BUCKET>/lookups/products.parquet",
+            "lookup_format": "parquet",
+            "join_column": "product_id",
+            "select_columns": ["product_name", "category", "subcategory"],
+            "join_type": "left"
+          },
+          {
+            "lookup_key": "region_mapping",
+            "lookup_s3_path": "s3://<YOUR-DATA-BUCKET>/lookups/regions.csv",
+            "lookup_format": "csv",
+            "join_column": "region_code",
+            "select_columns": ["region_name", "country"],
+            "join_type": "left"
+          }
+        ]
+      }
+    ]
+  }
+}

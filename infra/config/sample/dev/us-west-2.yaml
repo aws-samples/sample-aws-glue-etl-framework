@@ -1,0 +1,53 @@
+# Sample ETL Framework Configuration
+# Copy this file and customize for your environment.
+#
+# Usage:
+#   cdk deploy --context env=dev --context domain=sample \
+#              --context account=123456789012 --context region=us-west-2
+
+env: dev
+region: us-west-2
+prefix: mycompany
+account_id: "123456789012"
+
+# Deploy the generic ETL framework stack
+deploy_generic_etl: true
+
+# DynamoDB Configuration
+dynamodb:
+  deletion_protection: false  # Set to true for production
+
+# Glue Configuration
+glue:
+  glue_version: "4.0"
+  max_retries: 0
+  execution_timeout: 90
+
+# Tags (applied to all resources - customize for your organization)
+tags:
+  application: "etl-framework"
+  team: "data-engineering"
+  cost-center: "engineering"
+
+# External S3 buckets that Glue jobs need access to (optional)
+# external_s3_buckets:
+#   - "my-external-data-bucket"
+#   - "partner-shared-bucket"
+
+# Cross-account role ARNs for multi-account access (optional)
+# cross_account_role_arns:
+#   - "arn:aws:iam::987654321098:role/cross-account-data-access"
+
+# Glue Connection Configuration (optional)
+# Uncomment and configure if you need VPC connectivity (e.g., for Redshift)
+# create_connection: true
+# glue_connection:
+#   type: NETWORK  # or JDBC
+#   subnet_id: "subnet-0abc123def456"
+#   security_group_ids:
+#     - "sg-0abc123def456"
+#   availability_zone: "us-west-2a"
+#   # For JDBC connections, provide a Secrets Manager ARN containing
+#   # the credentials (username, password). Never put credentials in config files.
+#   secrets_arn: "arn:aws:secretsmanager:us-west-2:123456789012:secret:jdbc-creds"
+#   jdbc_url: "jdbc:redshift://cluster.region.redshift.amazonaws.com:5439/db"
